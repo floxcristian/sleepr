@@ -19,7 +19,12 @@ import { LocalStrategy } from './strategies/local.strategy';
         MONGODB_URI: Joi.string().required(),
         PORT: Joi.number().required(),
         JWT_SECRET: Joi.string().required(),
-        JWT_EXPIRATION: Joi.string().required(),
+        JWT_EXPIRATION: Joi.alternatives()
+          .try(
+            Joi.number().positive(), // Acepta números (segundos)
+            Joi.string().pattern(/^\d+[smhd]?$/), // Acepta strings como '1h', '60s', etc.
+          )
+          .required(),
       }),
     }),
     JwtModule.registerAsync({
