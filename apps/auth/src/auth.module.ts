@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { LocalStrategy } from './strategies/local.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -16,9 +17,11 @@ import { LocalStrategy } from './strategies/local.strategy';
       isGlobal: true,
       envFilePath: './apps/auth/.env',
       validationSchema: Joi.object({
+        HTTP_PORT: Joi.number().required(),
+        TCP_PORT: Joi.number().required(),
         MONGODB_URI: Joi.string().required(),
-        PORT: Joi.number().required(),
         JWT_SECRET: Joi.string().required(),
+        JWT_SECURE_COOKIE: Joi.boolean().required(),
         JWT_EXPIRATION: Joi.alternatives()
           .try(
             Joi.number().positive(), // Acepta números (segundos)
@@ -38,6 +41,6 @@ import { LocalStrategy } from './strategies/local.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
 })
 export class AuthModule {}

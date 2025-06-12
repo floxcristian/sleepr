@@ -3,11 +3,12 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { UserDocument } from './user/schemas/user.schema';
 import { CookieOptions, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { JwtTimeUtil } from './utils/jwt-time.util';
+import { TokenPayload } from './models/token-payload.interface';
+import { UserDocument } from '@app/common';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +21,7 @@ export class AuthService {
 
   async login(user: UserDocument, response: Response): Promise<void> {
     try {
-      const tokenPayload = { userId: user._id.toHexString() };
+      const tokenPayload: TokenPayload = { userId: user._id.toHexString() };
       const token = this.jwtService.sign(tokenPayload);
 
       const jwtExpiration = this.getJwtExpirationInSeconds();

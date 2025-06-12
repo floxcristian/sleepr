@@ -9,10 +9,10 @@ export class ReservationService {
     private readonly reservationRepository: ReservationRepository, // Assuming you have a ReservationRepository injected
   ) {}
 
-  create(createReservationDto: CreateReservationDto) {
+  create(createReservationDto: CreateReservationDto, userId: string) {
     return this.reservationRepository.create({
       ...createReservationDto,
-      userId: '123',
+      userId,
     });
   }
 
