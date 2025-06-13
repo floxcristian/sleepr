@@ -96,3 +96,17 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## 🧩 Proyectos de referencia que usan Nx + NestJS
+
+Estos son algunos proyectos open source destacados que utilizan **NestJS** junto con **Nx** para estructurar monorepos escalables. Sirven como excelente referencia para buenas prácticas y arquitecturas modernas:
+
+| Proyecto                                                      | Descripción                                                                                                                      | ⭐ Stars | Tecnologías adicionales            |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------- |
+| [**Novu**](https://github.com/novuhq/novu)                    | Plataforma de notificaciones multicanal (email, SMS, push, Slack). Infraestructura para enviar y gestionar eventos en productos. | ⭐ 37.1k | NestJS, Nx, React, TypeScript      |
+| [**Amplication**](https://github.com/amplication/amplication) | Plataforma low-code para generar backends en Node/NestJS. Admin UI para definir modelos, relaciones y permisos.                  | ⭐ 15.7k | NestJS, Nx, Prisma, GraphQL, React |
+| [**APITable**](https://github.com/apitable/apitable)          | Alternativa open source a Airtable. Base de datos colaborativa tipo hoja de cálculo con API abierta.                             | ⭐ 14.5k | NestJS, Nx, Next.js, React         |
+| [**Ghostfolio**](https://github.com/ghostfolio/ghostfolio)    | Gestor patrimonial privado para rastreo de portafolios financieros. Aplicación financiera personal.                              | ⭐ 5.9k  | NestJS, Nx, Angular, Prisma        |
+| [**Ever Gauzy**](https://github.com/ever-co/ever-gauzy)       | Suite ERP/CRM de gestión de negocio (proyectos, tiempo, RRHH, finanzas). Monorepo modular.                                       | ⭐ 2.6k  | NestJS, Nx, Angular, TypeORM       |
+
+> ℹ️ Todos estos proyectos usan Nx como base de su monorepo y NestJS como framework backend principal.

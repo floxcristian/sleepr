@@ -25,5 +25,18 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules # Excluir node_modules del host
+  payment:
+    build:
+      context: .
+      dockerfile: ./apps/payment/Dockerfile
+      target: development
+    command: pnpm run start:dev payment
+    env_file:
+      - ./apps/payment/.env
+    ports:
+      - '3003:3003'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules # Excluir node_modules del host
   mongo:
     image: mongo

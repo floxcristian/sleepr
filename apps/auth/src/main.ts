@@ -27,6 +27,7 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
 
   await app.startAllMicroservices();
-  await app.listen(configService.get<number>('HTTP_PORT') || 3001);
+  // Necesitamos el app.listen? porque el payment no maneja HTTP, pero el auth sí?
+  await app.listen(configService.get<number>('HTTP_PORT')!);
 }
 bootstrap();
