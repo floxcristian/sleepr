@@ -30,10 +30,3 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return user;
   }
 }
-
-/*jwtFromRequest: (req) => {
-                const token = req.cookies['jwt'];
-                return token || null; // Devuelve el token JWT desde las cookies
-            },
-            ignoreExpiration: false, // No ignorar la expiración del token
-            secretOrKey: process.env.JWT_SECRET, // Clave secreta para verificar el token*/

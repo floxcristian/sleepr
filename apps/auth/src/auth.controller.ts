@@ -1,16 +1,15 @@
 import { Controller, Post, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { PassportLocalAuthGuard, PassportJwtAuthGuard } from './guards';
 import { CurrentUser, UserDocument } from '@app/common';
 import { Response } from 'express';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(PassportLocalAuthGuard)
   @Post('login')
   async login(
     @CurrentUser() user: UserDocument,
@@ -20,7 +19,7 @@ export class AuthController {
     response.send(user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(PassportJwtAuthGuard)
   @MessagePattern('authenticate')
   async authenticate(@Payload() data: any) {
     return data.user;

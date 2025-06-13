@@ -10,7 +10,7 @@ import { map, Observable, tap } from 'rxjs';
 import { UserDto } from '../dto';
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
+export class MicroserviceJwtAuthGuard implements CanActivate {
   constructor(@Inject(AUTH_SERVICE) private readonly authClient: ClientProxy) {}
   // This guard would typically extend a base guard that checks for JWT tokens
   // and validates them against the user service.
