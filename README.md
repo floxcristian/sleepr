@@ -110,3 +110,40 @@ Estos son algunos proyectos open source destacados que utilizan **NestJS** junto
 | [**Ever Gauzy**](https://github.com/ever-co/ever-gauzy)       | Suite ERP/CRM de gestión de negocio (proyectos, tiempo, RRHH, finanzas). Monorepo modular.                                       | ⭐ 2.6k  | NestJS, Nx, Angular, TypeORM       |
 
 > ℹ️ Todos estos proyectos usan Nx como base de su monorepo y NestJS como framework backend principal.
+
+### 🏗️ Proyectos con NestJS + Microservicios
+
+Compartimos una selección de proyectos open-source que utilizan **NestJS** para implementar arquitecturas de microservicios. Perfectos como referencia para diseño y patrones distribuidos:
+
+| Proyecto                                                                                         | ⭐ Stars | Descripción                                                                           | Tecnologías principales                       |
+| ------------------------------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------- | --------------------------------------------- |
+| [**nestjs-rest-microservices**](https://github.com/benjsicam/nestjs-rest-microservices)          | 453      | API Gateway REST + microservicios gRPC en un monorepo con Docker Compose.             | NestJS, gRPC, PostgreSQL, Sequelize           |
+| [**booking‑microservices‑nestjs**](https://github.com/meysamhadeli/booking-microservices-nestjs) | 211      | Ejemplo completo con CQRS, DDD, RabbitMQ, Postgres, OpenTelemetry y pruebas.          | NestJS, RabbitMQ, PostgreSQL, MongoDB, Docker |
+| [**nestjs‑microservices**](https://github.com/tkssharma/nestjs-microservices)                    | 120      | Monorepo con transporte TCP, gRPC, Kafka y RabbitMQ, usando Nx.                       | NestJS, Nx, TCP, gRPC, Kafka, RabbitMQ        |
+| [**nestjs‑microservices‑example**](https://github.com/Denrox/nestjs-microservices-example)       | 954      | Caso real con múltiples servicios (usuarios, tareas, mailer), TCP, Mongo y Docker.    | NestJS, MongoDB, TCP, Docker                  |
+| [**nx‑nest‑microservice**](https://github.com/nbaua/nx-nest-microservice)                        | 13       | Demo con Nx: apps Nest, librería compartida y RabbitMQ; soporta varias DBs y Fastify. | NestJS, Nx, RabbitMQ, TypeORM, MongoDB/MySQL  |
+
+## 🏗️ Apps open-source con NestJS + Microservicios
+
+Referencias de proyectos reales que implementan arquitecturas **microservicios** con **NestJS**, ideales para inspirarte en patrones de diseño, transporte, trazabilidad y despliegue:
+
+| Proyecto                                                                                                    | ⭐ Estrellas | Descripción                                                                                             | Tecnologías                                         |
+| ----------------------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [**microservices‑realworld‑app**](https://github.com/sefininio/microservices-realworld-app)                 | 118          | RealWorld App con gateway GraphQL y microservicios independientes por dominio en monorepo Nx.           | NestJS, Nx, MongoDB, GraphQL, Redis, Docker Compose |
+| [**nestjs‑microservices‑example**](https://github.com/Denrox/nestjs-microservices-example)                  | 954          | Gestión de usuarios y tareas con múltiples servicios (user, task, mailer…) conectados por TCP y Docker. | NestJS, MongoDB, TCP, Docker                        |
+| [**booking‑microservices‑nestjs**](https://github.com/meysamhadeli/booking-microservices-nestjs)            | 211          | Implementación con CQRS, DDD, RabbitMQ, Postgres, trazabilidad y pruebas.                               | NestJS, RabbitMQ, PostgreSQL, MongoDB               |
+| [**nestjs‑microservices**](https://github.com/tkssharma/nestjs-microservices)                               | 120          | Demostración de varios transportes (TCP, gRPC, Kafka, RabbitMQ) en monorepo con Nx.                     | NestJS, Nx, TCP, gRPC, Kafka, RabbitMQ              |
+| [**nestjs‑microservices** (API gateway/order/payment)](https://github.com/mahathir85/nestjs-microservices)  | —            | Arquitectura API gateway con servicios de órdenes y pagos, lista para Kubernetes.                       | NestJS, Kubernetes                                  |
+| [**nest‑microservice‑boilerplate‑api**](https://github.com/mikemajesty/nestjs-microservice-boilerplate-api) | —            | Boilerplate con Onion Architecture, DDD y patrón Ports & Adapters.                                      | NestJS, DDD, Ports & Adapters                       |
+
+## 🔌 Aplicaciones Open Source que usan Microservicios con NestJS
+
+Estas aplicaciones reales implementan arquitecturas de microservicios utilizando **NestJS**. Son una excelente referencia para entender cómo se construyen sistemas distribuidos en producción.
+
+| Proyecto                                                    | Descripción                                                                                                             | Tecnologías adicionales                                     | ⭐ Stars  | Actividad / madurez                                                        |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | --------- | -------------------------------------------------------------------------- |
+| [**Novu**](https://github.com/novuhq/novu)                  | Plataforma de notificaciones multicanal (in-app, email, SMS, push). Maneja millones de eventos mensuales en producción. | NestJS, MongoDB, Redis, BullMQ, Kubernetes                  | ⭐ ~37k   | Muy activo y respaldado por empresa. Excelente documentación.              |
+| [**APITable**](https://github.com/apitable/apitable)        | Plataforma colaborativa tipo Airtable. Usa NestJS en el backend y permite construir apps low-code con API expuesta.     | NestJS, Next.js, Java (Spring), GraphQL, Docker, Kubernetes | ⭐ ~14.5k | Activo y en rápido crecimiento. Arquitectura híbrida sólida.               |
+| [**BunnyChess**](https://github.com/pietrobassi/bunnychess) | Servidor de ajedrez multijugador distribuido usando gRPC y NATS entre servicios NestJS.                                 | NestJS, gRPC, NATS JetStream, Docker                        | ⭐ ~24    | Proyecto pequeño pero útil como referencia clara de microservicios NestJS. |
+
+> ℹ️ Todas las aplicaciones están disponibles públicamente en GitHub y utilizan **NestJS como framework backend** dentro de una **arquitectura de microservicios**.
