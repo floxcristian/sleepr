@@ -19,9 +19,10 @@ export class ReservationService {
     { email, _id: userId }: UserDto,
   ) {
     return this.paymentService
-      .send<
-        Stripe.Response<Stripe.PaymentIntent>
-      >('create_charge', createReservationDto.charge)
+      .send<Stripe.Response<Stripe.PaymentIntent>>('create_charge', {
+        ...createReservationDto.charge,
+        email,
+      })
       .pipe(
         map((res) =>
           this.reservationRepository.create({
