@@ -8,15 +8,14 @@ RUN npm install -g pnpm
 # Copiar archivos de configuración y dependencias
 COPY package.json pnpm-lock.yaml ./
 # NUEVO
-COPY tsconfig*.json nest-cli.json ./ 
+COPY tsconfig.json ./ 
 
 # Instalar dependencias
 RUN pnpm install
 
 # Copiar código fuente
 COPY libs/ ./libs/
-COPY apps/ ./apps/
-# ANTES: COPY . .
+COPY apps/payment/ ./apps/payment/
 
 # Build
 RUN pnpm run build

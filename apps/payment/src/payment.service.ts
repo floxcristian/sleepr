@@ -39,8 +39,6 @@ export class PaymentService {
         enabled: true,
       },
     });
-
-    console.log('intentando emitir notificación de email');
     this.notificationService.emit('notify_email', {
       email,
       text: `Your payment of $${amount} has completed successfully!`,

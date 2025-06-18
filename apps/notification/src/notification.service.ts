@@ -10,7 +10,11 @@ export class NotificationService {
 
   constructor(private readonly configService: ConfigService) {}
 
-  private async getTransporter() {
+  /**
+   * Crea y devuelve un transporter de nodemailer configurado.
+   * @returns nodemailer.Transporter
+   */
+  private getTransporter(): nodemailer.Transporter {
     if (!this.transporter) {
       this.transporter = nodemailer.createTransport({
         service: 'gmail',
