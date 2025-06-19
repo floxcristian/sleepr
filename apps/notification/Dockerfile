@@ -7,7 +7,9 @@ RUN npm install -g pnpm
 
 # Copiar archivos de configuración y dependencias
 COPY package.json pnpm-lock.yaml ./
-COPY tsconfig*.json ./ 
+
+# Copiar archivos de configuración de TypeScript y NestJS
+COPY tsconfig.json nest-cli.json ./
 
 # Instalar dependencias
 RUN pnpm install
@@ -16,8 +18,14 @@ RUN pnpm install
 COPY libs/ ./libs/
 COPY apps/notification/ ./apps/notification/
 
+# Instalar dependencias
+#RUN pnpm install -r
+
+# Instalar dependencias específicas de la aplicación notification
+RUN cd apps/notification && pnpm install
+
 # Build
-RUN pnpm run build
+RUN pnpm run build notification
 
 FROM node:alpine AS production
 

@@ -7,8 +7,9 @@ RUN npm install -g pnpm
 
 # Copiar archivos de configuración y dependencias
 COPY package.json pnpm-lock.yaml ./
-# NUEVO
-COPY tsconfig.json ./ 
+
+# Copiar archivos de configuración de TypeScript y NestJS
+COPY tsconfig.json nest-cli.json ./
 
 # Instalar dependencias
 RUN pnpm install
@@ -17,8 +18,14 @@ RUN pnpm install
 COPY libs/ ./libs/
 COPY apps/payment/ ./apps/payment/
 
+# Instalar dependencias
+#RUN pnpm install -r
+
+# Instalar dependencias específicas de la aplicación payment
+RUN cd apps/payment && pnpm install
+
 # Build
-RUN pnpm run build
+RUN pnpm run build payment
 
 FROM node:alpine AS production
 

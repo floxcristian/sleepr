@@ -53,13 +53,14 @@ gcloud auth configure-docker \
 docker build -t reservation -f apps/reservation/Dockerfile .
 ```
 
-- La tagueamos:
+- Tagueamos la imagen para subirla al Artifact Registry de Google Cloud pegando la ruta que sacamos del repositorio de GCP y al final le agregamos el nombre de la imagen:
 
 ```
 docker tag reservation us-east4-docker.pkg.dev/sleepr-463202/reservation/production
+
 ```
 
-- La subimos:
+- Pushiamos la imagen al Artifact Registry:
 
 ```
 docker image push us-east4-docker.pkg.dev/sleepr-463202/reservation/production

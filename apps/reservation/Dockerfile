@@ -7,7 +7,9 @@ RUN npm install -g pnpm
 
 # Copiar archivos de configuración y dependencias
 COPY package.json pnpm-lock.yaml ./
-COPY tsconfig.json ./ 
+
+# Copiar archivos de configuración de TypeScript y NestJS
+COPY tsconfig.json nest-cli.json ./
 
 # Instalar dependencias
 RUN pnpm install
@@ -15,10 +17,15 @@ RUN pnpm install
 # Copiar código fuente
 COPY libs/ ./libs/
 COPY apps/reservation/ ./apps/reservation/
-# ANTES: COPY . .
+
+# Instalar dependencias
+#RUN pnpm install -r
+
+# Instalar dependencias específicas de la aplicación reservation
+RUN cd apps/reservation && pnpm install
 
 # Build
-RUN pnpm run build
+RUN pnpm run build reservation
 
 FROM node:alpine AS production
 
