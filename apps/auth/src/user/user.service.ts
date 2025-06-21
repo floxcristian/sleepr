@@ -11,11 +11,10 @@ import { GetUserDto } from './dto/get-user.dto';
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
-
   async create(createUserDto: CreateUserDto) {
     await this.validateCreateUserDto(createUserDto);
-    const saltRounds = 10;
-    const hashedPassword = bcrypt.hashSync(createUserDto.password, saltRounds);
+    const saltRounds = 12; // Increased from 10 for better security
+    const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds); // Use async version
     return this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
@@ -25,10 +24,9 @@ export class UserService {
   getUser(getUserDto: GetUserDto) {
     return this.userRepository.findOne({ _id: getUserDto.id });
   }
-
   async verifyUser(email: string, password: string): Promise<any> {
     const user = await this.userRepository.findOne({ email });
-    if (user && bcrypt.compareSync(password, user.password)) {
+    if (user && await bcrypt.compare(password, user.password)) {
       return user;
     }
     throw new UnauthorizedException('Invalid credentials');
