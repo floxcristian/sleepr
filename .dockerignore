@@ -1,2 +1,37 @@
+# Dependencies
 **/node_modules
+**/npm-debug.log*
+**/pnpm-debug.log*
+
+# Build outputs
 dist
+build
+.next
+
+# Development files
+.git
+.gitignore
+README.md
+*.md
+.env*
+.DS_Store
+
+# Test files (opcional - podrías querer incluirlos)
+**/*.spec.ts
+**/*.test.ts
+**/coverage
+
+# Docker files
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Logs
+logs
+*.log
