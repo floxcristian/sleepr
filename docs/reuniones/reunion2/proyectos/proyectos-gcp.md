@@ -1,0 +1,3 @@
+- Lo ideal es tener un proyecto por ambiente.
+    - ecommerce-chile-dev
+    - ecommerce-chile-prod

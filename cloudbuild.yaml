@@ -1,0 +1,61 @@
+steps:
+  ## Reservation Service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build', 
+      '-t', 
+      'us-east4-docker.pkg.dev/sleepr-463202/reservation/production', 
+      '-f',
+      'apps/reservation/Dockerfile',
+      '.'
+    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      'us-east4-docker.pkg.dev/sleepr-463202/reservation/production', 
+    ]
+  ## Auth Service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build', 
+      '-t', 
+      'us-east4-docker.pkg.dev/sleepr-463202/auth/production', 
+      '-f',
+      'apps/auth/Dockerfile',
+      '.'
+    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      'us-east4-docker.pkg.dev/sleepr-463202/auth/production', 
+    ]
+  ## Notification Service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build', 
+      '-t', 
+      'us-east4-docker.pkg.dev/sleepr-463202/notification/production', 
+      '-f',
+      'apps/notification/Dockerfile',
+      '.'
+    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      'us-east4-docker.pkg.dev/sleepr-463202/notification/production', 
+    ]
+  ## Payment Service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build', 
+      '-t', 
+      'us-east4-docker.pkg.dev/sleepr-463202/payment/production', 
+      '-f',
+      'apps/payment/Dockerfile',
+      '.'
+    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      'us-east4-docker.pkg.dev/sleepr-463202/payment/production', 
+    ]

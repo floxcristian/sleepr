@@ -1,0 +1,119 @@
+# Workflow para CI/CD de microservicios en GCP Multi-País - PRODUCCIÓN
+name: Build and Deploy to GCP Artifact Registry (Production)
+
+# Se ejecuta en push a main (deploy) y PRs (validación)
+on:
+  push:
+    branches: [main] # Deploy automático cuando se hace push a main
+  pull_request:
+    branches: [main] # Validación en Pull Requests hacia main
+  workflow_dispatch: # Permite ejecución manual para deploys específicos
+    inputs:
+      target_countries:
+        description: 'Países a deployar (chile,peru,spain o all)'
+        required: true
+        default: 'all'
+        type: string
+
+jobs:
+  # Job principal que maneja build y deploy de todas las imágenes para múltiples países
+  build-and-deploy:
+    name: Build and Deploy - ${{ matrix.country }} - ${{ matrix.service }}
+    runs-on: ubuntu-latest
+
+    # Estrategia matrix: países x servicios
+    strategy:
+      matrix:
+        country: [chile, peru, spain]
+        service: [reservation, auth, notification, payment]
+        # Excluir combinaciones si ciertos servicios no aplican a ciertos países
+        # exclude:
+        #   - country: chile
+        #     service: payment  # Ejemplo: si Chile no usa el servicio de payment
+
+    # Configuración de environment por país (PRODUCCIÓN)
+    environment:
+      name: production-${{ matrix.country }}
+      url: https://${{ matrix.service }}-${{ matrix.country }}.sleepr.com
+
+    # Permisos necesarios para autenticación con GCP usando Workload Identity
+    permissions:
+      contents: read # Permiso para leer código del repositorio
+      id-token: write # Permiso para escribir tokens OIDC (requerido para Workload Identity Federation)
+
+    steps:
+      # Step 1: Filtrar países si es ejecución manual
+      - name: Check if country should be deployed
+        if: github.event_name == 'workflow_dispatch' && !contains(inputs.target_countries, matrix.country) && inputs.target_countries != 'all'
+        run: |
+          echo "Skipping deployment for ${{ matrix.country }}"
+          exit 0
+
+      # Step 2: Descargar código del repositorio
+      - name: Checkout code
+        uses: actions/checkout@v4 # Action oficial de GitHub para clonar el repo
+
+      # Step 3: Configurar Docker Buildx (builder avanzado de Docker)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3 # Habilita features como cache y multi-arch
+
+      # Step 4: Autenticación con Google Cloud usando Workload Identity Federation
+      - name: Authenticate to Google Cloud
+        id: auth # ID para referenciar outputs de este step
+        uses: google-github-actions/auth@v2 # Action oficial de Google
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }} # Provider específico configurado en environment
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }} # Service Account específico por país
+
+      # Step 5: Configurar Google Cloud SDK (comando gcloud)
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2 # Instala y configura gcloud CLI
+
+      # Step 6: Configurar Docker para usar gcloud como helper de autenticación
+      # Permite a Docker usar credenciales de gcloud para el registry específico del país
+      - name: Configure Docker to use gcloud as credential helper
+        run: |
+          gcloud auth configure-docker ${{ vars.REGISTRY }}
+
+      # Step 7: Construir imagen Docker para cada microservicio por país
+      # Comando docker build explicado:
+      # -t: tag/nombre de la imagen final (servicio sin sufijo de país)
+      # ${{ vars.REGISTRY }}: registry específico por país (ej: southamerica-west1-docker.pkg.dev)
+      # ${{ vars.PROJECT_ID }}: project ID específico por país (ej: sleepr-chile-463202)
+      # ${{ matrix.service }}: nombre del servicio (ej: auth, reservation)
+      # ${{ github.sha }}: commit hash para versionado
+      # --build-arg COUNTRY: argumento para configuración específica del país
+      # -f: path al Dockerfile específico del servicio
+      # .: contexto de build (directorio raíz del proyecto)
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ matrix.service }}/production:${{ github.sha }} \
+            -t ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ matrix.service }}/production:latest \
+            -f apps/${{ matrix.service }}/Dockerfile \
+            --build-arg COUNTRY=${{ matrix.country }} \
+            .
+
+      # Step 8: Subir imagen a Artifact Registry (solo en push a main o workflow_dispatch)
+      # Solo se ejecuta cuando es push directo a main o ejecución manual, no en Pull Requests
+      - name: Push Docker image
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          docker push ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ matrix.service }}/production:${{ github.sha }}
+          docker push ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ matrix.service }}/production:latest
+
+      # Step 9: Verificar que el deploy fue exitoso (solo en push a main o workflow_dispatch)
+      # Lista la imagen más reciente para confirmar que se subió correctamente
+      - name: Verify deployment
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Successfully deployed ${{ matrix.service }} for ${{ matrix.country }} to Artifact Registry"
+          gcloud artifacts docker images list ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ matrix.service }} --limit=1
+
+      # Step 10: Mensaje de validación para Pull Requests
+      # Confirma que el build funcionó sin subir la imagen
+      - name: Build verification (PR only)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "✅ ${{ matrix.service }} image built successfully for ${{ matrix.country }} (PR validation)"
+          echo "Image would be: ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ matrix.service }}/production"

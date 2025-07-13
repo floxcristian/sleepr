@@ -1,0 +1,156 @@
+# Workflow para CI/CD de microservicios On-Premise Multi-País - DESARROLLO
+name: Build and Deploy to On-Premise Infrastructure (Development)
+
+# Se ejecuta en push a develop (deploy) y PRs (validación)
+on:
+  push:
+    branches: [develop] # Deploy automático cuando se hace push a develop
+  pull_request:
+    branches: [develop] # Validación en Pull Requests hacia develop
+  workflow_dispatch: # Permite ejecución manual para deploys específicos
+    inputs:
+      target_countries:
+        description: 'Países a deployar (chile,peru,spain o all)'
+        required: true
+        default: 'all'
+        type: string
+
+jobs:
+  # Job principal que maneja build y deploy de todas las imágenes para múltiples países (DESARROLLO)
+  build-and-deploy:
+    name: Build and Deploy - ${{ matrix.country }} - ${{ matrix.service }} (DEV)
+    runs-on: ubuntu-latest
+
+    # Estrategia matrix: países x servicios
+    strategy:
+      matrix:
+        country: [chile, peru, spain]
+        service: [reservation, auth, notification, payment]
+        exclude:
+          # Excluir combinaciones si ciertos servicios no aplican a ciertos países
+          # - country: chile
+          #   service: payment  # Ejemplo: si Chile no usa el servicio de payment
+
+    # Configuración de environment por país (DESARROLLO)
+    environment:
+      name: development-${{ matrix.country }}
+      url: https://${{ matrix.service }}-${{ matrix.country }}-dev.sleepr.com
+
+    # Permisos necesarios para el ambiente de desarrollo
+    permissions:
+      contents: read # Permiso para leer código del repositorio
+      # TODO: Agregar permisos específicos para acceso on-premise
+
+    steps:
+      # Step 1: Filtrar países si es ejecución manual
+      - name: Check if country should be deployed
+        if: github.event_name == 'workflow_dispatch' && !contains(inputs.target_countries, matrix.country) && inputs.target_countries != 'all'
+        run: |
+          echo "::notice::Skipping deployment for ${{ matrix.country }} - not in target countries"
+          exit 0
+
+      # Step 2: Checkout del código fuente
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 3: Configurar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Step 4: Instalar dependencias
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 5: Ejecutar tests unitarios
+      - name: Run unit tests
+        run: npm run test:${{ matrix.service }}
+
+      # Step 6: Ejecutar linting
+      - name: Run linter
+        run: npm run lint:${{ matrix.service }}
+
+      # Step 7: Build de la aplicación
+      - name: Build application
+        run: npm run build:${{ matrix.service }}
+
+      # Step 8: Configurar Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Step 9: Login al registry on-premise
+      - name: Login to On-Premise Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY }}
+          username: ${{ secrets.DEV_REGISTRY_USERNAME }}
+          password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
+
+      # Step 10: Construir imagen Docker
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: |
+            ${{ vars.REGISTRY }}/${{ matrix.country }}/${{ matrix.service }}/development:latest
+            ${{ vars.REGISTRY }}/${{ matrix.country }}/${{ matrix.service }}/development:${{ github.sha }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Step 11: Deploy a infraestructura on-premise
+      - name: Deploy to On-Premise Infrastructure
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.DEV_SSH_HOST }}
+          SSH_USER: ${{ secrets.DEV_SSH_USER }}
+          SERVICE_NAME: ${{ matrix.service }}
+          COUNTRY: ${{ matrix.country }}
+          IMAGE_TAG: ${{ vars.REGISTRY }}/${{ matrix.country }}/${{ matrix.service }}/development:${{ github.sha }}
+        run: |
+          # Configurar SSH
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+
+          # Deploy usando SSH
+          ssh $SSH_USER@$SSH_HOST << EOF
+            # Actualizar la imagen del servicio
+            docker pull $IMAGE_TAG
+            
+            # Actualizar el servicio en el ambiente de desarrollo
+            cd /opt/sleepr/development/$COUNTRY
+            docker-compose -f docker-compose.yml -f docker-compose.$SERVICE_NAME.yml up -d $SERVICE_NAME
+            
+            # Verificar que el servicio esté corriendo
+            docker ps | grep $SERVICE_NAME
+            
+            # Health check básico
+            sleep 30
+            curl -f http://localhost:3000/health || exit 1
+          EOF
+
+      # Step 12: Verificar deployment
+      - name: Verify deployment
+        env:
+          SERVICE_URL: https://${{ matrix.service }}-${{ matrix.country }}-dev.sleepr.com
+        run: |
+          # Esperar a que el servicio esté disponible
+          sleep 60
+
+          # Verificar health endpoint
+          curl -f $SERVICE_URL/health
+
+          echo "✅ Deployment successful for ${{ matrix.service }} in ${{ matrix.country }} (development)"
+
+      - name: Placeholder step
+        run: |
+          echo "🚧 Workflow de desarrollo en construcción"
+          echo "País: ${{ matrix.country }}"
+          echo "Servicio: ${{ matrix.service }}"
+          echo "Ambiente: development"

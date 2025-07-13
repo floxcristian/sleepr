@@ -1,0 +1,8 @@
+- Inicialmente se considera un solo cluster de kubernetes para el commerce layer.
+    - Es un poco grande porque falta información de cantidad servicios desplegados, recursos que consume cada servicio, cuantos pods se tendrán de cada uno, el tráfico esperado, etc.
+    - Más adelante se recomienda partir ese unico nodo cluster en 2 nodos cluster para tener mejor distribución, dependiendo del numero de microservicios, donde se estiman 9 microservicios inicialmente.
+- Se estima en presupuesto en GCP de alrededor de los 1000 USD.
+    - Logs.
+    - Almacenamiento en Artifact Registry para las imagenes de los microservicios para cada vez que cada vez que se vaya a generar un deployment se genere una imagen. Eso se debe multiplicar por el numero de microservicios.
+    - Tráfico basado en la cantidad de requests reales. Se debe considerar que un load balancer le da varias veces request al microservicio para el health check y eso aumenta el numero de requests pero no es tráfico real.
+    - Base de datos.
