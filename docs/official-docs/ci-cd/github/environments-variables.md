@@ -51,10 +51,9 @@ Los **Environments** de GitHub te permiten:
 
 ### Ejemplo de secrets:
 
-| Nombre del Secret     | Descripción                                   |
-| --------------------- | --------------------------------------------- |
-| `WIF_PROVIDER`        | Nombre del recurso Workload Identity Provider |
-| `WIF_SERVICE_ACCOUNT` | Email de la Service Account de GCP            |
+| Nombre del Secret | Descripción                                   |
+| ----------------- | --------------------------------------------- |
+| `WIF_PROVIDER`    | Nombre del recurso Workload Identity Provider |
 
 > **Tip:** Los secrets son cifrados y solo accesibles por los workflows que usan ese environment.
 

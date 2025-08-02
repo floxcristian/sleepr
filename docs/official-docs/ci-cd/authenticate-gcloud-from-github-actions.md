@@ -1,4 +1,4 @@
-# 🔐 Autenticarse en Google Cloud desde GitHub Actions usando Workload Identity Federation
+# 🔐 Autenticarse en Google Cloud desde GitHub Actions usando Workload Identity Federation (WIF)
 
 ## 📖 Descripción general
 
@@ -19,7 +19,7 @@ Esta GitHub Action se autentica con Google Cloud. Soporta autenticación mediant
 
 Hay **tres formas** de configurar esta GitHub Action para autenticarse con Google Cloud:
 
-1. **🥇 (Recomendado) Direct Workload Identity Federation**
+1. **🥇 (Recomendado) Direct Workload Identity Federation (WIF)**
 2. **🥈 Workload Identity Federation through a Service Account**
 3. **🥉 Service Account Key JSON**
 
@@ -337,7 +337,7 @@ projects/171529469407/locations/global/workloadIdentityPools/github/providers/my
 
 **Nota**
 
-- Este resultado (Workload Identity Provider) lo usaremos en nuestro workflow de Github Actions.
+- Este resultado (Workload Identity Provider) lo usaremos en nuestro workflow de Github Actions como el `secrets.WIF_PROVIDER`.
 
 ### 🔗 Paso 5: Configurar GitHub Actions
 
