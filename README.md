@@ -147,3 +147,5 @@ Estas aplicaciones reales implementan arquitecturas de microservicios utilizando
 | [**BunnyChess**](https://github.com/pietrobassi/bunnychess) | Servidor de ajedrez multijugador distribuido usando gRPC y NATS entre servicios NestJS.                                 | NestJS, gRPC, NATS JetStream, Docker                        | ⭐ ~24    | Proyecto pequeño pero útil como referencia clara de microservicios NestJS. |
 
 > ℹ️ Todas las aplicaciones están disponibles públicamente en GitHub y utilizan **NestJS como framework backend** dentro de una **arquitectura de microservicios**.
+
+pruebita
