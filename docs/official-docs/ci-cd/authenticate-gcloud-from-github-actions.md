@@ -346,6 +346,15 @@ Usa este valor como `workload_identity_provider` en tu archivo YAML de GitHub Ac
 ```yaml
 - uses: 'google-github-actions/auth@v2'
   with:
+    project_id: ${PROJECT_ID}
+    workload_identity_provider: ${WIF_PROVIDER}
+```
+
+- Entonces, para nuestro ejemplo quedaría así:
+
+```yaml
+- uses: 'google-github-actions/auth@v2'
+  with:
     project_id: 'sleepr-463202'
     workload_identity_provider: 'projects/171529469407/locations/global/workloadIdentityPools/github/providers/my-repo'
 ```
@@ -371,8 +380,21 @@ El siguiente ejemplo muestra cómo otorgar acceso desde una GitHub Action en un 
 gcloud secrets add-iam-policy-binding "my-secret" \
  --project="${PROJECT_ID}" \
   --role="roles/secretmanager.secretAccessor" \
-  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
+  --member="principalSet://iam.googleapis.com/${WIF_PROVIDER}/attribute.repository/${REPO}"
 ```
+
+#### Ejemplo: Escritura en Artifact Registry
+
+```bash
+gcloud projects add-iam-policy-binding "${PROJECT_ID}" --member="principalSet://iam.googleapis.com/${WIF_PROVIDER}/attribute.repository/${REPO}" --role="roles/artifactregistry.writer"
+```
+
+```bash
+gcloud projects add-iam-policy-binding "sleepr-463202" --member="principalSet://iam.googleapis.com/projects/171529469407/locations/global/workloadIdentityPools/github
+/attribute.repository/floxcristian/sleepr" --role="roles/artifactregistry.writer"
+```
+
+#### Ejemplo: Subir capas de Docker
 
 ## 📚 Referencias adicionales
 
