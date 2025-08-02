@@ -24,10 +24,9 @@ jobs:
       matrix:
         service: [reservation, auth, notification, payment]
 
-    # Configuración de environment
+    # Configuración de environment (necesario para acceder a secrets y protecciones de producción)
     environment:
-      name: production-chile # Esto se configura en Github Environments
-      url: https://${{ matrix.service }}-chile.sleepr.com
+      name: production-chile
 
     # Permisos necesarios para autenticación con GCP usando Workload Identity
     permissions:
