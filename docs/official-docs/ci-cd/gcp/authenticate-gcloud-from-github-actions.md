@@ -23,36 +23,12 @@ Hay **tres formas** de configurar esta GitHub Action para autenticarse con Googl
 2. **🥈 Workload Identity Federation through a Service Account**
 3. **🥉 Service Account Key JSON**
 
-## ⚠️ Consideraciones importantes
-
-### 📝 Sobre gsutil
-
-> **Importante:** El comando `gsutil` **NO** usará las credenciales exportadas por esta GitHub Action. Los usuarios deben usar `gcloud storage` en su lugar.
-
 ## 🛠️ Requisitos previos
 
-### 1. ✅ Checkout obligatorio
-
-Ejecuta el paso `actions/checkout@v4` **ANTES** de esta action:
-
-```yaml
-- uses: actions/checkout@v4
-```
-
-> ⚠️ **Advertencia:** Omitir el paso checkout o ponerlo después de auth causará que los pasos futuros no puedan autenticarse.
-
-### 2. 🔒 Ignorar credenciales generadas
-
-Para crear binarios, contenedores, pull requests u otros releases, agrega lo siguiente a tus archivos `.gitignore`, `.dockerignore` y similares para prevenir commits accidentales de credenciales:
-
-```gitignore
-# Ignore generated credentials from google-github-actions/auth
-gha-creds-*.json
-```
-
-### 3. 🟢 Versión de Node.js
-
-Esta action se ejecuta usando **Node 20**. Usa una versión de runner que soporte esta versión de Node o más nueva.
+- Una cuenta de GitHub
+- Una cuenta de Google Cloud
+- Un proyecto de Google Cloud
+- Un repositorio de Google Cloud Artifact Registry
 
 ## 💻 Ejemplo de uso básico
 
@@ -191,7 +167,7 @@ El `PROJECT_ID` lo sacamos de Google Cloud Console:
 
 <img src="/docs/images/gcp/project_id.png">
 
-### 🔧 Paso 2: Crear un Workload Identity Pool
+### Paso 2: Crear un Workload Identity Pool
 
 ```bash
 # TODO: replace ${PROJECT_ID} with your value below.
@@ -228,7 +204,7 @@ Created workload identity pool [github].
 - Y aquí ya vemos el grupo de Workload Identity creado:
   <img src="/docs/images/gcp/wip_created.png">
 
-### 🔍 Paso 3: Obtener el ID completo del Workload Identity Pool
+### Paso 3: Obtener el ID completo del Workload Identity Pool
 
 ```bash
 # TODO: replace ${PROJECT_ID} with your value below.
@@ -264,7 +240,7 @@ projects/171529469407/locations/global/workloadIdentityPools/github
 - Y aquí podremos ver el id completo del Workload Identity Pool:
   <img src="/docs/images/gcp/wip_id.png">
 
-### 🛡️ Paso 3: Crear un Workload Identity Provider
+### Paso 4: Crear un Workload Identity Provider
 
 ```bash
 # TODO: reemplaza ${PROJECT_ID} y ${GITHUB_ORG} con tus valores
@@ -306,7 +282,7 @@ Created workload identity pool provider [my-repo].
 - Luego deberíamos poder ver nuestro proveedor configurado:
   <img src="/docs/images/gcp/github_repo_provider.png">
 
-### 📤 Paso 4: Extraer el nombre del recurso Workload Identity Provider
+### Paso 5: Extraer el nombre del recurso Workload Identity Provider
 
 ```bash
 # TODO: reemplaza ${PROJECT_ID} con tu valor
@@ -339,7 +315,7 @@ projects/171529469407/locations/global/workloadIdentityPools/github/providers/my
 
 - Este resultado (Workload Identity Provider) lo usaremos en nuestro workflow de Github Actions como el `secrets.WIF_PROVIDER`.
 
-### 🔗 Paso 5: Configurar GitHub Actions
+### Paso 6: Configurar GitHub Actions
 
 Usa este valor como `workload_identity_provider` en tu archivo YAML de GitHub Actions:
 
@@ -359,7 +335,7 @@ Usa este valor como `workload_identity_provider` en tu archivo YAML de GitHub Ac
     workload_identity_provider: 'projects/171529469407/locations/global/workloadIdentityPools/github/providers/my-repo'
 ```
 
-### 🔐 Paso 6: Conceder acceso a recursos de Google Cloud
+### Paso 7: Conceder acceso a recursos de Google Cloud
 
 Según sea necesario, permite autenticaciones desde el Workload Identity Pool a recursos de Google Cloud. Estos pueden ser cualquier recurso de Google Cloud que soporte tokens de ID federados, y puede hacerse después de que la GitHub Action esté configurada.
 
@@ -938,36 +914,4 @@ gcloud iam workload-identity-pools providers create-oidc "trusted-actors" \
     curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
       "https://cloudresourcemanager.googleapis.com/v1/projects/${{ steps.auth.outputs.project_id }}" | \
       jq '.projectId // "ERROR: No se pudo acceder al proyecto"'
-```
-
-## 📋 Checklist de debugging
-
-```markdown
-### ✅ Checklist de troubleshooting
-
-#### Configuración básica:
-
-- [ ] `actions/checkout@v4` se ejecuta antes de auth
-- [ ] Los permisos `id-token: write` están configurados
-- [ ] El `workload_identity_provider` tiene el formato correcto
-- [ ] El `project_id` es correcto
-
-#### Workload Identity Pool:
-
-- [ ] El pool existe y está activo
-- [ ] El provider está configurado correctamente
-- [ ] Los attribute mappings incluyen los claims necesarios
-- [ ] Las attribute conditions permiten el acceso
-
-#### IAM y permisos:
-
-- [ ] El principalSet tiene los roles necesarios
-- [ ] Los roles son suficientes para las operaciones requeridas
-- [ ] No hay políticas organizacionales que bloqueen el acceso
-
-#### GitHub Actions:
-
-- [ ] El repositorio está en la organización correcta
-- [ ] La rama coincide con las attribute conditions
-- [ ] El actor tiene permisos en el repositorio
 ```

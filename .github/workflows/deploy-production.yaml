@@ -54,7 +54,7 @@ jobs:
         id: auth # ID para referenciar outputs de este step
         uses: google-github-actions/auth@v2 # Action oficial de Google
         with:
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }} # Provider específico configurado en environment
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }} # Provider específico configurado en environment secret
           project_id: ${{ vars.PROJECT_ID }} # Project ID específico por país
 
       # Step 5: Configurar Google Cloud SDK (comando gcloud)
@@ -79,6 +79,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
+            --target production \
             -t ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ matrix.service }}/production:${{ github.sha }} \
             -t ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ matrix.service }}/production:latest \
             -f apps/${{ matrix.service }}/Dockerfile \
@@ -99,3 +100,166 @@ jobs:
         run: |
           echo "Successfully deployed ${{ matrix.service }} to Artifact Registry"
           gcloud artifacts docker images list ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}/${{ matrix.service }} --limit=1
+
+  # Job separado para notificaciones consolidadas - Mejores prácticas
+  notify-teams:
+    name: Notify Teams
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    if: always() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+    environment:
+      name: production-chile
+
+    steps:
+      # Evaluar resultados de todos los servicios
+      - name: Evaluate deployment results
+        id: eval
+        run: |
+          # Evaluar el resultado general del deployment
+          if [[ "${{ needs.build-and-deploy.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "Services deployed successfully: reservation, auth, notification, payment"
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "One or more services failed to deploy"
+          fi
+
+      # Notificación consolidada de éxito
+      - name: Notify Teams on Success
+        if: steps.eval.outputs.status == 'success'
+        uses: aliencube/microsoft-teams-actions@v0.8.0
+        with:
+          webhook_uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          title: '✅ Deploy Completo - Producción Chile'
+          summary: 'Todos los microservicios desplegados exitosamente'
+          text: |
+            **🚀 Deploy Exitoso en Producción**
+
+            **Servicios desplegados:** reservation, auth, notification, payment
+            **Ambiente:** production-chile
+            **Commit:** ${{ github.sha }}
+            **Registry:** ${{ vars.REGISTRY }}/${{ vars.PROJECT_ID }}
+            **Actor:** ${{ github.actor }}
+            **Repositorio:** ${{ github.repository }}
+          theme_color: '28a745'
+          sections: |
+            [
+              {
+                "activityTitle": "📋 Resumen del Deploy",
+                "activitySubtitle": "Información consolidada del despliegue",
+                "facts": [
+                  {
+                    "name": "🏷️ Tag de imágenes",
+                    "value": "production:${{ github.sha }} + production:latest"
+                  },
+                  {
+                    "name": "🌍 Registry",
+                    "value": "${{ vars.REGISTRY }}"
+                  },
+                  {
+                    "name": "📦 Project ID",
+                    "value": "${{ vars.PROJECT_ID }}"
+                  },
+                  {
+                    "name": "🌿 Rama",
+                    "value": "${{ github.ref_name }}"
+                  },
+                  {
+                    "name": "⏰ Timestamp",
+                    "value": "${{ github.event.head_commit.timestamp }}"
+                  }
+                ]
+              }
+            ]
+          actions: |
+            [
+              {
+                "@type": "OpenUri",
+                "name": "🔍 Ver Workflow",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              },
+              {
+                "@type": "OpenUri",
+                "name": "📦 Artifact Registry",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "https://console.cloud.google.com/artifacts/docker/${{ vars.PROJECT_ID }}"
+                  }
+                ]
+              }
+            ]
+
+      # Notificación consolidada de fallo
+      - name: Notify Teams on Failure
+        if: steps.eval.outputs.status == 'failure'
+        uses: aliencube/microsoft-teams-actions@v0.8.0
+        with:
+          webhook_uri: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          title: '❌ Deploy Fallido - Producción Chile'
+          summary: 'Error en el despliegue de microservicios'
+          text: |
+            **🚨 Error en Deploy de Producción**
+
+            **Servicios afectados:** Uno o más de: reservation, auth, notification, payment
+            **Ambiente:** production-chile
+            **Commit:** ${{ github.sha }}
+            **Actor:** ${{ github.actor }}
+            **Repositorio:** ${{ github.repository }}
+
+            ⚠️ **Acción requerida:** Revisar logs y reintentar deploy
+          theme_color: 'dc3545'
+          sections: |
+            [
+              {
+                "activityTitle": "🔍 Información del Error",
+                "activitySubtitle": "Detalles para debugging",
+                "facts": [
+                  {
+                    "name": "📦 Project ID",
+                    "value": "${{ vars.PROJECT_ID }}"
+                  },
+                  {
+                    "name": "🌿 Rama",
+                    "value": "${{ github.ref_name }}"
+                  },
+                  {
+                    "name": "🔧 Job fallido",
+                    "value": "build-and-deploy"
+                  },
+                  {
+                    "name": "⏰ Timestamp",
+                    "value": "${{ github.event.head_commit.timestamp }}"
+                  }
+                ]
+              }
+            ]
+          actions: |
+            [
+              {
+                "@type": "OpenUri",
+                "name": "🔍 Ver Logs",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              },
+              {
+                "@type": "OpenUri",
+                "name": "🔄 Reintentar Deploy",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "${{ github.server_url }}/${{ github.repository }}/actions/workflows/deploy-production.yaml"
+                  }
+                ]
+              }
+            ]
